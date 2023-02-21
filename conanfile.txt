@@ -1,7 +1,8 @@
 [requires]
-rapidjson/1.1.0
-boost/1.75.0
+rapidjson/cci.20220822
+boost/1.81.0
 
 [generators]
-cmake
-pkg_config
+CMakeDeps
+CMakeToolchain
+PkgConfigDeps

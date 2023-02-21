@@ -1,16 +1,12 @@
 cmake_minimum_required(VERSION 3.8)
 
+if(POLICY CMP0091)
+  cmake_policy(SET CMP0091 NEW)
+endif()
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 project(PajladaSettings)
-
-option(PAJLADA_SETTINGS_USE_CONAN "Use conan file manager to handle dependencies" OFF)
-
-if (PAJLADA_SETTINGS_USE_CONAN OR CONAN_EXPORTED)
-    message(STATUS "Building Pajlada::Settings with Conan")
-    include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
-endif()
 
 set(PajladaSettings_SOURCES
     src/settings/settingdata.cpp
@@ -109,16 +105,12 @@ else()
 endif()
 
 # rapidjson = c++ json library
-if (TARGET CONAN_PKG::rapidjson)
-    target_link_libraries(PajladaSettings PUBLIC CONAN_PKG::rapidjson)
+if (TARGET RapidJSON::RapidJSON)
+    message(STATUS "Using preexisting rapidjson target")
+    target_link_libraries(PajladaSettings PUBLIC RapidJSON::RapidJSON)
 else()
-    if (TARGET RapidJSON::RapidJSON)
-        message(STATUS "Using preexisting rapidjson target")
-        target_link_libraries(PajladaSettings PUBLIC RapidJSON::RapidJSON)
-    else()
-        find_package(RapidJSON REQUIRED)
-        target_include_directories(PajladaSettings PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
-    endif()
+    find_package(RapidJSON REQUIRED)
+    target_include_directories(PajladaSettings PUBLIC ${RapidJSON_INCLUDE_DIRS})
 endif()
 
 # TODO: Try find_package, and if not found, do the conan link
@@ -137,13 +129,9 @@ else()
 endif()
 
 
-if (TARGET CONAN_PKG::boost)
-    target_link_libraries(PajladaSettings PUBLIC CONAN_PKG::boost)
-else()
-    if (PAJLADA_SETTINGS_USE_BOOST_FILESYSTEM)
-        find_package(Boost REQUIRED system filesystem)
-        target_link_libraries(PajladaSettings PUBLIC Boost::filesystem Boost::system)
-    endif()
+if (PAJLADA_SETTINGS_USE_BOOST_FILESYSTEM)
+    find_package(Boost REQUIRED system filesystem)
+    target_link_libraries(PajladaSettings PUBLIC Boost::filesystem Boost::system)
 endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS YES)
